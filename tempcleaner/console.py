@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import ctypes
 import os
-import sys
 
 
 def _kernel32():
@@ -28,8 +27,8 @@ def launched_by_double_click() -> bool:
     """True se la console è stata creata apposta per questo programma (doppio clic).
 
     In un terminale già aperto la console è condivisa con la shell, quindi i
-    processi collegati sono di più. L'exe "onefile" di PyInstaller usa due
-    processi (avvio + programma), per questo la soglia sale a 2.
+    processi collegati sono di più. Quando parte da "Avvia TempCleaner.cmd"
+    (variabile TEMPCLEANER_LAUNCHER=1) c'è anche cmd.exe, per questo la soglia sale a 2.
     """
     kernel32 = _kernel32()
     if kernel32 is None:
@@ -39,7 +38,7 @@ def launched_by_double_click() -> bool:
         count = kernel32.GetConsoleProcessList(processes, 8)
     except OSError:
         return False
-    own = 2 if getattr(sys, "frozen", False) else 1
+    own = 2 if os.environ.get("TEMPCLEANER_LAUNCHER") == "1" else 1
     return 0 < count <= own
 
 

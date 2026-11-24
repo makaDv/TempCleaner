@@ -12,19 +12,23 @@ Trova da solo le cartelle `Temp`, mostra cosa contengono e quali programmi le ri
 
 ## Download e avvio (il modo più semplice)
 
-1. Scarica **[TempCleaner.exe](https://github.com/makaDv/TempCleaner/releases/latest/download/TempCleaner.exe)** dalla pagina [Releases](https://github.com/makaDv/TempCleaner/releases/latest).
-2. Fai **doppio clic** sul file. Non serve installare nulla, nemmeno Python.
-3. Premi **Invio** nel menu per pulire la tua cartella Temp, oppure scegli altre cartelle (es. `1,4`).
-4. Leggi l'anteprima, scrivi `ACCETTO` e conferma con `s`. La finestra resta aperta finché non premi Invio.
+1. Scarica **[TempCleaner.zip](https://github.com/makaDv/TempCleaner/releases/latest/download/TempCleaner.zip)** dalla pagina [Releases](https://github.com/makaDv/TempCleaner/releases/latest).
+2. Tasto destro sullo zip → **Estrai tutto**.
+3. Apri la cartella: il primo file è **`Avvia TempCleaner.cmd`**. Fai doppio clic.
+4. Premi **Invio** nel menu per pulire la tua cartella Temp, oppure scegli altre cartelle (es. `1,4`).
+5. Leggi l'anteprima, scrivi `ACCETTO` e conferma con `s`. La finestra resta aperta finché non premi Invio.
 
-> **Avviso di Windows SmartScreen:** l'exe non ha una firma digitale a pagamento, quindi Windows può mostrare "Windows ha protetto il PC".
-> Clicca **Ulteriori informazioni** → **Esegui comunque**. L'exe viene compilato da GitHub Actions direttamente da questo codice sorgente ([workflow](.github/workflows/release.yml)).
-> Per controllare che il file non sia stato alterato, confronta il suo hash con `TempCleaner.exe.sha256` nella release:
+Serve **Python 3.9 o superiore**. Se manca, il file di avvio propone di installarlo con `winget`, lo strumento ufficiale di Microsoft.
+
+> **Perché non c'è un .exe?** Windows 11 con *Smart App Control* blocca ogni .exe che non ha una firma digitale a pagamento.
+> TempCleaner invece parte con Python, che è firmato dalla Python Software Foundation, e il file di avvio è testo che puoi leggere con il Blocco note.
+> Se compare "Apri file - Avviso di sicurezza", clicca **Esegui**. Per evitarlo, prima di estrarre: tasto destro sullo zip → **Proprietà** → spunta **Sblocca**.
+> Per controllare che lo zip non sia stato alterato, confronta il suo hash con `TempCleaner.zip.sha256` nella release:
 > ```powershell
-> Get-FileHash .\TempCleaner.exe -Algorithm SHA256
+> Get-FileHash .\TempCleaner.zip -Algorithm SHA256
 > ```
 
-Per pulire anche `Windows\Temp` e le Temp degli altri utenti: tasto destro sull'exe → **Esegui come amministratore**, poi scegli `all` nel menu.
+Per pulire anche `Windows\Temp` e le Temp degli altri utenti: tasto destro su `Avvia TempCleaner.cmd` → **Esegui come amministratore**, poi scegli `all` nel menu.
 
 ## Cosa fa
 
@@ -74,7 +78,7 @@ python -m tempcleaner -s user -a 72    # solo file più vecchi di 72 ore
 python -m tempcleaner -s user --json   # output JSON per script
 ```
 
-Con Python installato funziona anche il doppio clic su `TempCleaner.bat`. Le stesse opzioni valgono per l'exe, ad esempio `TempCleaner.exe -s user -n`.
+Dalla cartella della repo funziona anche il doppio clic su `Avvia TempCleaner.cmd`. Le stesse opzioni si possono passare al file di avvio, ad esempio `"Avvia TempCleaner.cmd" -s user -n`.
 
 | Opzione | Descrizione |
 |---|---|

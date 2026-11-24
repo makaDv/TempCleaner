@@ -169,8 +169,10 @@ class ConsoleTests(unittest.TestCase):
             self.assertTrue(console.launched_by_double_click())
         with self._fake_kernel32(3):
             self.assertFalse(console.launched_by_double_click())
-        with self._fake_kernel32(2), mock.patch("sys.frozen", True, create=True):
+        with self._fake_kernel32(2), mock.patch.dict(os.environ, {"TEMPCLEANER_LAUNCHER": "1"}):
             self.assertTrue(console.launched_by_double_click())
+        with self._fake_kernel32(2), mock.patch.dict(os.environ, {"TEMPCLEANER_LAUNCHER": ""}):
+            self.assertFalse(console.launched_by_double_click())
 
     def test_pause_only_on_double_click(self):
         from tempcleaner import console
@@ -188,6 +190,26 @@ class ConsoleTests(unittest.TestCase):
             from tempcleaner.cli import main as cli_main
             self.assertEqual(cli_main([]), 1)
             pause.assert_called_once()
+
+
+class PackageTests(unittest.TestCase):
+    def test_release_zip_has_launcher_first_and_no_folders(self):
+        import importlib.util
+        import zipfile
+        root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        spec = importlib.util.spec_from_file_location("build", os.path.join(root, "packaging", "build.py"))
+        build = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(build)
+        with tempfile.TemporaryDirectory() as out:
+            target = build.build(__import__("pathlib").Path(out))
+            with zipfile.ZipFile(target) as package:
+                names = package.namelist()
+                self.assertFalse(any("/" in n for n in names))
+                self.assertEqual(sorted(names, key=str.lower)[0], "Avvia TempCleaner.cmd")
+                self.assertIn(b"\r\n", package.read("Avvia TempCleaner.cmd"))
+                pyz = zipfile.ZipFile(__import__("io").BytesIO(package.read("TempCleaner-app.pyz")))
+                self.assertIn("__main__.py", pyz.namelist())
+                self.assertIn("tempcleaner/cli.py", pyz.namelist())
 
 
 if __name__ == "__main__":

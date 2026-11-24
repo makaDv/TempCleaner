@@ -1,0 +1,28 @@
+TempCleaner - pulizia sicura delle cartelle Temp di Windows
+============================================================
+
+COME SI AVVIA
+1. Estrai lo zip in una cartella (tasto destro > Estrai tutto).
+2. Fai doppio clic su "Avvia TempCleaner.cmd".
+3. Premi Invio nel menu per pulire la tua cartella Temp (oppure scegli altre cartelle).
+4. Leggi l'anteprima, scrivi ACCETTO e conferma con S.
+
+Serve Python 3.9 o superiore. Se manca, il programma propone di installarlo
+con winget, lo strumento ufficiale di Microsoft.
+
+SE WINDOWS MOSTRA UN AVVISO
+I file scaricati da Internet possono mostrare "Apri file - Avviso di sicurezza":
+clicca "Esegui". Per evitarlo, prima di estrarre: tasto destro sullo zip >
+Proprieta' > spunta "Sblocca" > OK.
+
+COSA CONTIENE
+- Avvia TempCleaner.cmd   file di avvio (testo leggibile con il Blocco note)
+- TempCleaner-app.pyz     il programma Python (archivio zip del codice sorgente)
+- DISCLAIMER.txt          esclusione di responsabilita'
+- LICENSE.txt             licenza MIT
+
+RESPONSABILITA'
+TempCleaner e' solo uno strumento: chi lo usa si assume la piena responsabilita'
+di quello che fa. I file vengono eliminati in modo definitivo. Leggi DISCLAIMER.txt.
+
+Codice sorgente: https://github.com/makaDv/TempCleaner
