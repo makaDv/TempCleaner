@@ -5,7 +5,7 @@ import unittest
 from unittest import mock
 
 from tempcleaner.cleaner import clean
-from tempcleaner.cli import parse_scopes
+from tempcleaner.cli import main, parse_scopes
 from tempcleaner.discovery import TempRoot, discover, is_safe_root
 from tempcleaner.scanner import scan
 from tempcleaner.services import OTHER, identify
@@ -144,6 +144,17 @@ class ServiceAndCliTests(unittest.TestCase):
         self.assertEqual(parse_scopes("all"), ["user", "users", "system", "apps"])
         with self.assertRaises(ValueError):
             parse_scopes("documenti")
+
+    def test_yes_requires_accept_responsibility(self):
+        with mock.patch("tempcleaner.cli.discover") as disc, mock.patch("sys.stderr"):
+            self.assertEqual(main(["-s", "user", "-y"]), 2)
+            disc.assert_not_called()
+
+    def test_refusing_disclaimer_deletes_nothing(self):
+        with mock.patch("tempcleaner.cli.clean") as cln, \
+                mock.patch("builtins.input", side_effect=["no"]), mock.patch("builtins.print"):
+            self.assertEqual(main(["-s", "user", "-a", "0"]), 0)
+            cln.assert_not_called()
 
 
 if __name__ == "__main__":

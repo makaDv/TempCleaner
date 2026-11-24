@@ -8,6 +8,7 @@ import sys
 
 from . import __version__
 from .cleaner import clean
+from .disclaimer import ACCEPT_WORDS, DISCLAIMER
 from .discovery import SCOPES, discover
 from .report import Style, enable_color, print_preview, print_result, print_roots, to_json
 from .scanner import scan
@@ -56,6 +57,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("-t", "--top", type=int, default=10, metavar="N", help="righe nelle classifiche (default: 10)")
     p.add_argument("-v", "--verbose", action="store_true", help="elenca ogni file eliminato")
     p.add_argument("--json", action="store_true", help="output in formato JSON (senza domande)")
+    p.add_argument("--accept-responsibility", action="store_true",
+                   help="dichiari di assumerti la responsabilità dell'uso (obbligatorio con --yes)")
+    p.add_argument("--disclaimer", action="store_true", help="mostra l'esclusione di responsabilità ed esce")
     p.add_argument("--no-color", action="store_true", help="disattiva i colori")
     p.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     return p
@@ -74,6 +78,12 @@ def ask_scopes(style: Style) -> list[str]:
             print(style.yellow("  Scelta non valida, riprova."))
 
 
+def accept_disclaimer(style: Style) -> bool:
+    print(style.yellow("\n" + DISCLAIMER))
+    answer = input(style.bold("\nScrivi ACCETTO per assumerti la responsabilità e continuare: "))
+    return answer.strip().lower() in ACCEPT_WORDS
+
+
 def confirm(question: str) -> bool:
     return input(question).strip().lower() in {"s", "si", "sì", "y", "yes"}
 
@@ -84,11 +94,20 @@ def main(argv: list[str] | None = None) -> int:
             sys.stdout.reconfigure(errors="replace")
         else:  # output rediretto su file o pipe: UTF-8 per non perdere le lettere accentate
             sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    if hasattr(sys.stderr, "reconfigure") and not sys.stderr.isatty():
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
     args = build_parser().parse_args(argv)
     if args.min_age < 0:
         print("--min-age non può essere negativo", file=sys.stderr)
         return 2
     style = Style(enable_color(args.no_color or args.json))
+    if args.disclaimer:
+        print(DISCLAIMER)
+        return 0
+    if args.yes and not args.dry_run and not args.accept_responsibility:
+        print("--yes elimina senza domande: aggiungi --accept-responsibility per dichiarare che ti "
+              "assumi la responsabilità dell'uso (vedi --disclaimer).", file=sys.stderr)
+        return 2
 
     try:
         if args.scope:
@@ -121,9 +140,15 @@ def main(argv: list[str] | None = None) -> int:
         if args.dry_run:
             print(style.dim("\nModalità anteprima (--dry-run): nessun file è stato eliminato."))
             return 0
-        if not args.yes and not confirm(style.bold("\nEliminare questi file? [s/N]: ")):
-            print("Operazione annullata, nessun file eliminato.")
-            return 0
+        if args.yes:
+            print(style.dim("\nResponsabilità accettata con --accept-responsibility."))
+        else:
+            if not accept_disclaimer(style):
+                print("Responsabilità non accettata, nessun file eliminato.")
+                return 0
+            if not confirm(style.bold("\nEliminare definitivamente questi file? [s/N]: ")):
+                print("Operazione annullata, nessun file eliminato.")
+                return 0
 
         print(style.dim("Eliminazione in corso..."))
         result = clean(preview, keep_paths=args.verbose)
