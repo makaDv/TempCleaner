@@ -1,7 +1,9 @@
 @echo off
 setlocal EnableExtensions
 title TempCleaner
-cd /d "%~dp0"
+rem Il percorso va salvato prima di "cd": dopo, %~dp0 puo' risultare sbagliato.
+set "HERE=%~dp0"
+cd /d "%HERE%"
 
 rem TempCleaner - avvio con doppio clic.
 rem Usa Python, firmato dalla Python Software Foundation: nessun .exe da sbloccare.
@@ -13,10 +15,16 @@ call :find_python
 if not defined PY call :offer_install
 if not defined PY goto :no_python
 
-if exist "%~dp0TempCleaner-app.pyz" (
-    "%PY%" "%~dp0TempCleaner-app.pyz" %*
-) else (
+if exist "%HERE%TempCleaner-app.pyz" (
+    "%PY%" "%HERE%TempCleaner-app.pyz" %*
+) else if exist "%HERE%tempcleaner\__init__.py" (
     "%PY%" -m tempcleaner %*
+) else (
+    echo.
+    echo  File "TempCleaner-app.pyz" non trovato: estrai di nuovo tutto lo zip nella stessa cartella.
+    echo.
+    pause
+    exit /b 1
 )
 exit /b %errorlevel%
 
