@@ -3,11 +3,12 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
+import traceback
 
 from . import __version__
 from .cleaner import clean
+from .console import pause_if_needed, set_title
 from .disclaimer import ACCEPT_WORDS, DISCLAIMER
 from .discovery import SCOPES, discover
 from .report import Style, enable_color, print_preview, print_result, print_roots, to_json
@@ -89,6 +90,21 @@ def confirm(question: str) -> bool:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Punto di ingresso: esegue il programma e, se aperto con doppio clic, tiene aperta la finestra."""
+    set_title("TempCleaner")
+    try:
+        code = _run(argv)
+    except SystemExit as exc:  # argparse (--help, --version, errori di opzioni)
+        code = exc.code if isinstance(exc.code, int) else (0 if exc.code is None else 1)
+    except Exception:  # noqa: BLE001 - mostra l'errore invece di chiudere la finestra
+        traceback.print_exc()
+        print("\nErrore imprevisto: nessun altro file verrà eliminato.", file=sys.stderr)
+        code = 1
+    pause_if_needed()
+    return code
+
+
+def _run(argv: list[str] | None) -> int:
     if hasattr(sys.stdout, "reconfigure"):
         if sys.stdout.isatty():
             sys.stdout.reconfigure(errors="replace")

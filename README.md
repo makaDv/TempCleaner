@@ -10,6 +10,22 @@ Trova da solo le cartelle `Temp`, mostra cosa contengono e quali programmi le ri
 
 > **English summary:** a small, dependency-free Python CLI that auto-discovers Windows temp folders, shows which apps fill them, and deletes old temp files after confirmation. It only ever touches folders named `Temp`/`tmp`. MIT licensed.
 
+## Download e avvio (il modo più semplice)
+
+1. Scarica **[TempCleaner.exe](https://github.com/makaDv/TempCleaner/releases/latest/download/TempCleaner.exe)** dalla pagina [Releases](https://github.com/makaDv/TempCleaner/releases/latest).
+2. Fai **doppio clic** sul file. Non serve installare nulla, nemmeno Python.
+3. Premi **Invio** nel menu per pulire la tua cartella Temp, oppure scegli altre cartelle (es. `1,4`).
+4. Leggi l'anteprima, scrivi `ACCETTO` e conferma con `s`. La finestra resta aperta finché non premi Invio.
+
+> **Avviso di Windows SmartScreen:** l'exe non ha una firma digitale a pagamento, quindi Windows può mostrare "Windows ha protetto il PC".
+> Clicca **Ulteriori informazioni** → **Esegui comunque**. L'exe viene compilato da GitHub Actions direttamente da questo codice sorgente ([workflow](.github/workflows/release.yml)).
+> Per controllare che il file non sia stato alterato, confronta il suo hash con `TempCleaner.exe.sha256` nella release:
+> ```powershell
+> Get-FileHash .\TempCleaner.exe -Algorithm SHA256
+> ```
+
+Per pulire anche `Windows\Temp` e le Temp degli altri utenti: tasto destro sull'exe → **Esegui come amministratore**, poi scegli `all` nel menu.
+
 ## Cosa fa
 
 - **Trova le cartelle Temp da solo**, in quattro gruppi combinabili:
@@ -37,7 +53,7 @@ Trova da solo le cartelle `Temp`, mostra cosa contengono e quali programmi le ri
 - Windows 10 o 11
 - Python 3.9 o superiore. Nessuna libreria esterna.
 
-## Installazione
+## Uso da Python (sviluppatori)
 
 ```bash
 git clone https://github.com/makaDv/TempCleaner.git
@@ -58,7 +74,7 @@ python -m tempcleaner -s user -a 72    # solo file più vecchi di 72 ore
 python -m tempcleaner -s user --json   # output JSON per script
 ```
 
-In alternativa basta un doppio clic su `TempCleaner.bat`.
+Con Python installato funziona anche il doppio clic su `TempCleaner.bat`. Le stesse opzioni valgono per l'exe, ad esempio `TempCleaner.exe -s user -n`.
 
 | Opzione | Descrizione |
 |---|---|

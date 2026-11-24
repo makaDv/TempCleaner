@@ -157,5 +157,38 @@ class ServiceAndCliTests(unittest.TestCase):
             cln.assert_not_called()
 
 
+class ConsoleTests(unittest.TestCase):
+    def _fake_kernel32(self, count):
+        fake = mock.Mock()
+        fake.GetConsoleProcessList.return_value = count
+        return mock.patch("tempcleaner.console._kernel32", return_value=fake)
+
+    def test_double_click_detection(self):
+        from tempcleaner import console
+        with self._fake_kernel32(1):
+            self.assertTrue(console.launched_by_double_click())
+        with self._fake_kernel32(3):
+            self.assertFalse(console.launched_by_double_click())
+        with self._fake_kernel32(2), mock.patch("sys.frozen", True, create=True):
+            self.assertTrue(console.launched_by_double_click())
+
+    def test_pause_only_on_double_click(self):
+        from tempcleaner import console
+        with self._fake_kernel32(1), mock.patch("builtins.input") as inp:
+            console.pause_if_needed()
+            inp.assert_called_once()
+        with self._fake_kernel32(3), mock.patch("builtins.input") as inp:
+            console.pause_if_needed()
+            inp.assert_not_called()
+
+    def test_main_pauses_even_after_error(self):
+        with mock.patch("tempcleaner.cli._run", side_effect=RuntimeError("boom")), \
+                mock.patch("tempcleaner.cli.pause_if_needed") as pause, \
+                mock.patch("sys.stderr"), mock.patch("traceback.print_exc"):
+            from tempcleaner.cli import main as cli_main
+            self.assertEqual(cli_main([]), 1)
+            pause.assert_called_once()
+
+
 if __name__ == "__main__":
     unittest.main()

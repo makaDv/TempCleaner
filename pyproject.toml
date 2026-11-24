@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tempcleaner"
-version = "1.0.0"
+version = "1.1.0"
 description = "Trova automaticamente le cartelle Temp di Windows e ne elimina il contenuto in sicurezza."
 readme = "README.md"
 license = { text = "MIT" }
