@@ -10,7 +10,12 @@ Trova da solo le cartelle `Temp`, mostra cosa contengono e quali programmi le ri
 
 > **English summary:** a small, dependency-free Python CLI that auto-discovers Windows temp folders, shows which apps fill them, and deletes old temp files after confirmation. It only ever touches folders named `Temp`/`tmp`. MIT licensed.
 
-![Finestra di TempCleaner](docs/screenshot.png)
+<p>
+  <img src="docs/screenshot.png" alt="TempCleaner con il tema chiaro" width="49%">
+  <img src="docs/screenshot-dark.png" alt="TempCleaner con il tema scuro" width="49%">
+</p>
+
+Tema chiaro e scuro: il programma segue quello di Windows e si cambia con il tasto **Tema scuro / Tema chiaro** in alto a destra.
 
 ## Download e avvio (il modo più semplice)
 

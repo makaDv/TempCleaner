@@ -235,6 +235,19 @@ class GuiTests(unittest.TestCase):
         self.assertEqual(str(app.clean_btn.cget("state")), "normal")
         self.assertEqual(app.stat_vars["files"][1].get(), "923")
 
+    def test_theme_toggle(self):
+        from tempcleaner.gui import DARK, LIGHT, App
+        with mock.patch("tempcleaner.gui.system_prefers_dark", return_value=False):
+            app = App(self.root)
+        self.assertFalse(app.dark)
+        self.assertEqual(app.theme_btn.cget("text"), "Tema scuro")
+        app.toggle_theme()
+        self.assertTrue(app.dark)
+        self.assertEqual(app.theme_btn.cget("text"), "Tema chiaro")
+        self.assertEqual(str(app.notes.cget("bg")), DARK["card"])
+        app.toggle_theme()
+        self.assertEqual(str(app.notes.cget("bg")), LIGHT["card"])
+
     def test_clean_needs_responsibility(self):
         from tempcleaner.gui import App
         app = App(self.root)
