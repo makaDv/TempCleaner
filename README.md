@@ -10,13 +10,15 @@ Trova da solo le cartelle `Temp`, mostra cosa contengono e quali programmi le ri
 
 > **English summary:** a small, dependency-free Python CLI that auto-discovers Windows temp folders, shows which apps fill them, and deletes old temp files after confirmation. It only ever touches folders named `Temp`/`tmp`. MIT licensed.
 
+![Finestra di TempCleaner](docs/screenshot.png)
+
 ## Download e avvio (il modo più semplice)
 
 1. Scarica **[TempCleaner.zip](https://github.com/makaDv/TempCleaner/releases/latest/download/TempCleaner.zip)** dalla pagina [Releases](https://github.com/makaDv/TempCleaner/releases/latest).
 2. Tasto destro sullo zip → **Estrai tutto**.
-3. Apri la cartella: il primo file è **`Avvia TempCleaner.cmd`**. Fai doppio clic.
-4. Premi **Invio** nel menu per pulire la tua cartella Temp, oppure scegli altre cartelle (es. `1,4`).
-5. Leggi l'anteprima, scrivi `ACCETTO` e conferma con `s`. La finestra resta aperta finché non premi Invio.
+3. Apri la cartella: il primo file è **`Avvia TempCleaner.cmd`**. Fai doppio clic: si apre la finestra di TempCleaner.
+4. Scegli le cartelle e premi **Analizza**: vedi spazio occupato, servizi che creano più file e cartelle trovate.
+5. Premi **Pulisci**, spunta la casella di assunzione di responsabilità e conferma.
 
 Serve **Python 3.9 o superiore**. Se manca, il file di avvio propone di installarlo con `winget`, lo strumento ufficiale di Microsoft.
 
@@ -57,7 +59,9 @@ Per pulire anche `Windows\Temp` e le Temp degli altri utenti: tasto destro su `A
 - Windows 10 o 11
 - Python 3.9 o superiore. Nessuna libreria esterna.
 
-## Uso da Python (sviluppatori)
+## Versione testuale e uso da Python
+
+Senza parametri si apre la finestra grafica. Con qualsiasi parametro (oppure con `--cli`) parte la versione testuale nel terminale.
 
 ```bash
 git clone https://github.com/makaDv/TempCleaner.git
@@ -68,7 +72,8 @@ pip install .        # facoltativo: aggiunge il comando "tempcleaner"
 ## Uso
 
 ```bash
-python -m tempcleaner                  # menu interattivo per scegliere le cartelle
+python -m tempcleaner                  # finestra grafica
+python -m tempcleaner --cli            # versione testuale con menu
 python -m tempcleaner -s user          # solo il Temp dell'utente corrente
 python -m tempcleaner -s user,apps     # più scope insieme
 python -m tempcleaner -s all           # tutto (avvia il terminale come amministratore)
@@ -92,6 +97,7 @@ Dalla cartella della repo funziona anche il doppio clic su `Avvia TempCleaner.cm
 | `-v, --verbose` | elenca ogni file eliminato |
 | `--json` | output JSON; elimina solo con `--yes --accept-responsibility` |
 | `--no-color` | disattiva i colori |
+| `--cli` | versione testuale anche senza altre opzioni |
 
 ## Esempio di output
 

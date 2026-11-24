@@ -61,6 +61,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--accept-responsibility", action="store_true",
                    help="dichiari di assumerti la responsabilità dell'uso (obbligatorio con --yes)")
     p.add_argument("--disclaimer", action="store_true", help="mostra l'esclusione di responsabilità ed esce")
+    p.add_argument("--cli", action="store_true", help="usa la versione testuale anche senza altre opzioni")
     p.add_argument("--no-color", action="store_true", help="disattiva i colori")
     p.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     return p
@@ -104,13 +105,34 @@ def main(argv: list[str] | None = None) -> int:
     return code
 
 
+def _try_gui() -> int | None:
+    """Apre la finestra grafica; None se Tkinter o il display non sono disponibili."""
+    try:
+        import tkinter
+        from .gui import run_gui
+    except ImportError:
+        return None
+    try:
+        return run_gui()
+    except tkinter.TclError:
+        return None
+
+
 def _run(argv: list[str] | None) -> int:
+    if argv is None:
+        argv = sys.argv[1:]
+    if not argv:  # nessuna opzione (es. doppio clic): finestra grafica
+        code = _try_gui()
+        if code is not None:
+            return code
+    if sys.stdout is None:  # avviato con pythonw senza grafica: niente console su cui scrivere
+        return 1
     if hasattr(sys.stdout, "reconfigure"):
         if sys.stdout.isatty():
             sys.stdout.reconfigure(errors="replace")
         else:  # output rediretto su file o pipe: UTF-8 per non perdere le lettere accentate
             sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    if hasattr(sys.stderr, "reconfigure") and not sys.stderr.isatty():
+    if sys.stderr is not None and hasattr(sys.stderr, "reconfigure") and not sys.stderr.isatty():
         sys.stderr.reconfigure(encoding="utf-8", errors="replace")
     args = build_parser().parse_args(argv)
     if args.min_age < 0:

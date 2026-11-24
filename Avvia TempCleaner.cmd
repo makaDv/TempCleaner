@@ -15,6 +15,11 @@ call :find_python
 if not defined PY call :offer_install
 if not defined PY goto :no_python
 
+rem Senza parametri si apre la finestra grafica (pythonw: nessuna console).
+if "%~1"=="" (
+    "%PY%" -c "import tkinter" >nul 2>nul && goto :gui
+)
+
 if exist "%HERE%TempCleaner-app.pyz" (
     "%PY%" "%HERE%TempCleaner-app.pyz" %*
 ) else if exist "%HERE%tempcleaner\__init__.py" (
@@ -28,6 +33,16 @@ if exist "%HERE%TempCleaner-app.pyz" (
 )
 exit /b %errorlevel%
 
+
+:gui
+set "PYW=%PY:python.exe=pythonw.exe%"
+if not exist "%PYW%" set "PYW=%PY%"
+if exist "%HERE%TempCleaner-app.pyz" (
+    start "" "%PYW%" "%HERE%TempCleaner-app.pyz"
+) else (
+    start "" "%PYW%" -m tempcleaner
+)
+exit /b 0
 
 :find_python
 call :try_python py -3

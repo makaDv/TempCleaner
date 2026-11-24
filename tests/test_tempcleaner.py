@@ -192,6 +192,74 @@ class ConsoleTests(unittest.TestCase):
             pause.assert_called_once()
 
 
+def demo_scan():
+    """ScanResult finto, usato per i test della GUI e per lo screenshot."""
+    from tempcleaner.scanner import Item, ScanResult
+    roots = [TempRoot(r"C:\Users\utente\AppData\Local\Temp", "user"),
+             TempRoot(r"C:\Users\utente\AppData\Local\Programma\Temp", "apps", "Programma")]
+    data = [(0, "chrome_BITS_1", "Google Chrome / Chromium", 120, 2_500_000),
+            (0, "npm-cache-1", "Node.js (npm/yarn)", 760, 900_000),
+            (0, "vscode-inno-updater", "Visual Studio Code", 7, 280_000_000),
+            (0, "MSI1a2b.LOG", "Installer / Windows Installer", 24, 70_000),
+            (1, "cache.tmp", "Programma", 12, 23_000)]
+    items = []
+    for root_index, name, service, count, size in data:
+        root = roots[root_index]
+        item = Item(root, root.path + "\\" + name, name, service, True)
+        item.files = [(f"{item.path}\\f{i}", size // count) for i in range(count)]
+        item.dirs = [item.path]
+        items.append(item)
+    items[0].recent_files, items[0].recent_size = 40, 15_000_000
+    return roots, ScanResult(roots, items, 24.0)
+
+
+class GuiTests(unittest.TestCase):
+    def setUp(self):
+        try:
+            import tkinter
+            self.root = tkinter.Tk()
+        except Exception as exc:  # noqa: BLE001 - nessun display o Tk non installato
+            self.skipTest(f"Tk non disponibile: {exc}")
+        self.root.withdraw()
+
+    def tearDown(self):
+        self.root.destroy()
+
+    def test_scan_results_fill_the_window(self):
+        from tempcleaner.gui import App
+        app = App(self.root)
+        roots, result = demo_scan()
+        app.show_scan(roots, ["avviso di prova"], result)
+        self.assertEqual(len(app.services_tree.get_children()), 5)
+        self.assertEqual(len(app.roots_tree.get_children()), 2)
+        self.assertEqual(str(app.clean_btn.cget("state")), "normal")
+        self.assertEqual(app.stat_vars["files"][1].get(), "923")
+
+    def test_clean_needs_responsibility(self):
+        from tempcleaner.gui import App
+        app = App(self.root)
+        roots, result = demo_scan()
+        app.show_scan(roots, [], result)
+        with mock.patch.object(App, "ask_responsibility", return_value=False), \
+                mock.patch("tempcleaner.gui.clean") as cln:
+            app.start_clean()
+            cln.assert_not_called()
+
+
+class LaunchModeTests(unittest.TestCase):
+    def test_no_arguments_opens_gui(self):
+        from tempcleaner import cli
+        with mock.patch.object(cli, "_try_gui", return_value=0) as gui:
+            self.assertEqual(cli._run([]), 0)
+            gui.assert_called_once()
+
+    def test_arguments_use_text_mode(self):
+        from tempcleaner import cli
+        with mock.patch.object(cli, "_try_gui") as gui, mock.patch("sys.stdout"):
+            self.assertEqual(cli._run(["--disclaimer"]), 0)
+            gui.assert_not_called()
+
+
 class PackageTests(unittest.TestCase):
     def test_release_zip_has_launcher_first_and_no_folders(self):
         import importlib.util
